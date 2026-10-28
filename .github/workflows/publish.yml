@@ -1,7 +1,8 @@
 name: Publish @nexward/sdk
 
 # Publishing happens only here (ADR 0009 in the Nexward platform). Push a tag sdk-v<version>
-# matching packages/sdk/package.json; the npm-publish environment requires approval.
+# matching packages/sdk/package.json; the npm-publish environment requires approval. The release
+# is STAGED on npm: a maintainer approves it on npmjs.com (Staged Packages) with 2FA.
 on:
   push:
     tags: ["sdk-v*"]
@@ -52,14 +53,15 @@ jobs:
             exit 1
           fi
 
-      - name: npm with trusted publishing support (11.5.1 or newer)
-        run: npm install -g npm@11.6.2
+      - name: npm with staged and trusted publishing (11.15.0 or newer)
+        run: npm install -g npm@11.21.1
 
-      # pnpm pack rewrites workspace: versions; npm publishes the tarball with provenance.
-      - name: Publish
+      # pnpm pack rewrites workspace: versions; npm stages the tarball with provenance.
+      - name: Stage the release on npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           cd packages/sdk
           tarball="$(pnpm pack | tail -n 1)"
-          npm publish "${tarball}" --access public --provenance
+          npm stage publish "./${tarball}" --access public --provenance
+          echo "Staged. Approve it on npmjs.com > @nexward/sdk > Staged Packages (2FA required)."

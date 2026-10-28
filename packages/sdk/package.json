@@ -1,6 +1,6 @@
 {
   "name": "@nexward/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Runtime security for AI agents: ALLOW, BLOCK, or REQUIRE_APPROVAL before each tool call runs.",
   "keywords": [
     "ai",

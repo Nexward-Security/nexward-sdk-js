@@ -1,0 +1,4 @@
+packages:
+  - packages/*
+allowBuilds:
+  esbuild: false # its postinstall only re-checks the platform binary, which pnpm installs anyway

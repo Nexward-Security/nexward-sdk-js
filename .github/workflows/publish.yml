@@ -1,0 +1,65 @@
+name: Publish @nexward/sdk
+
+# Publishing happens only here (ADR 0009 in the Nexward platform). Push a tag sdk-v<version>
+# matching packages/sdk/package.json; the npm-publish environment requires approval.
+on:
+  push:
+    tags: ["sdk-v*"]
+
+permissions:
+  contents: read
+  id-token: write # npm trusted publishing and provenance
+
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: npm-publish
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          registry-url: https://registry.npmjs.org
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build, test, typecheck, verify the package
+        run: |
+          pnpm build
+          pnpm test
+          pnpm typecheck
+          pnpm pack-check
+
+      - name: Tag matches the package version
+        run: |
+          version="$(node -p "require('./packages/sdk/package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "sdk-v${version}" ]; then
+            echo "Tag ${GITHUB_REF_NAME} does not match package version ${version}" >&2
+            exit 1
+          fi
+
+      - name: npm with trusted publishing support (11.5.1 or newer)
+        run: npm install -g npm@11.6.2
+
+      # pnpm pack rewrites workspace: versions; npm publishes the tarball with provenance.
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd packages/sdk
+          tarball="$(pnpm pack | tail -n 1)"
+          npm publish "${tarball}" --access public --provenance

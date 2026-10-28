@@ -1,0 +1,56 @@
+{
+  "name": "@nexward/sdk",
+  "version": "0.1.0",
+  "description": "Runtime security for AI agents: ALLOW, BLOCK, or REQUIRE_APPROVAL before each tool call runs.",
+  "keywords": [
+    "ai",
+    "agents",
+    "security",
+    "llm",
+    "tool-calling",
+    "authorization",
+    "guardrails"
+  ],
+  "homepage": "https://nexward.ai/docs/api",
+  "license": "Apache-2.0",
+  "author": "Nexward LLC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Nexward-Security/nexward-sdk-js.git",
+    "directory": "packages/sdk"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.js.map",
+    "dist/*.d.ts",
+    "README.md",
+    "THIRD_PARTY_NOTICES.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.11",
+    "fast-check": "4.10.2",
+    "@nexward/types": "workspace:*"
+  }
+}
